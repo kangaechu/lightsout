@@ -107,9 +107,33 @@ class LightsOut:
                     return len(combinations)
         return -1
 
+    def solve_first_row_combinations(self):
+        """
+        最初の行の全通りを試すことによる最適手法検索
+        :return:
+        """
+        for initial_row in itertools.product((False, True), repeat=self.width):
+            temp_board = copy.deepcopy(self.board)
+            push_count = 0
+            # 最初の行のボタンを押す
+            for i, initial_cell in enumerate(initial_row):
+                if initial_cell:
+                    temp_board = self.__push(0, i, temp_board)
+                    push_count += 1
+
+            # i行目のライトを参考にi+1行目のボタンを押す
+            for i, row in enumerate(temp_board[0:-1]):
+                for j, cell in enumerate(row):
+                    if cell:
+                        self.__push(i + 1, j, temp_board)
+                        push_count += 1
+            if self.__is_all_off(temp_board):
+                return push_count
+        return -1
+
 
 if __name__ == '__main__':
     board = '\n'.join(['....', '.O..', '....'])
-    lightsout = LightsOut(3, 4, board)
+    lightsout = LightsOut(board)
     print(lightsout)
     print(lightsout.solve_round_robin())
