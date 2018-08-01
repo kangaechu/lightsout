@@ -9,10 +9,10 @@ class LightsOut:
     O = オン . = オフ
     """
 
-    def __init__(self, width: int, height: int, my_board: str):
-        self.width = width
-        self.height = height
+    def __init__(self, my_board: str):
         self.board = self.parse_board(my_board)
+        self.width = len(self.board[0])
+        self.height = len(self.board)
 
     def __str__(self):
         return self.to_str()
@@ -69,35 +69,40 @@ class LightsOut:
         :param board:  ボード
         :return:
         """
-        r = row - 1
-        c = column - 1
+        r = row
+        c = column
 
         board[r][c] = not board[r][c]
 
-        # 上のセル
+        # 左のセル
         if c - 1 >= 0:
             board[r][c - 1] = not board[r][c - 1]
-        # 下のセル
-        if c + 1 < self.height:
-            board[r][c + 1] = not board[r][c + 1]
         # 右のセル
-        if r + 1 < self.width:
+        if c + 1 <= self.width - 1:
+            board[r][c + 1] = not board[r][c + 1]
+        # 下のセル
+        if r + 1 <= self.height - 1:
             board[r + 1][c] = not board[r + 1][c]
-        # 左のセル
+        # 上のセル
         if r - 1 >= 0:
             board[r - 1][c] = not board[r - 1][c]
         return board
 
     def push(self, row: int, column: int):
+
         self.board = self.__push(row, column, self.board)
 
-    def solve(self):
-        wh = [[w, h] for w in range(self.width) for h in range(self.height)]
+    def solve_round_robin(self):
+        """
+        総当たりによる最適手法検索
+        :return:
+        """
+        wh = [[w, h] for w in range(self.height) for h in range(self.width)]
         for i in range(1, len(wh)):
             for combinations in itertools.combinations(wh, i):
                 temp_board = copy.deepcopy(self.board)
                 for c in combinations:
-                    temp_board = self.__push(c[0] + 1, c[1] + 1, temp_board)
+                    temp_board = self.__push(c[0], c[1], temp_board)
                 if self.__is_all_off(temp_board):
                     return len(combinations)
         return -1
@@ -107,4 +112,4 @@ if __name__ == '__main__':
     board = '\n'.join(['....', '.O..', '....'])
     lightsout = LightsOut(3, 4, board)
     print(lightsout)
-    print(lightsout.solve())
+    print(lightsout.solve_round_robin())
